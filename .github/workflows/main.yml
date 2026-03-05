@@ -1,0 +1,38 @@
+name: Java CI con Gradle
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Necesario para subir el JAR a los Artifacts
+
+    steps:
+    - name: Checkout del repositorio
+      uses: actions/checkout@v4
+
+    - name: Configurar Java 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin' # Adoptium es la más recomendada para MC
+        cache: 'gradle'
+
+    - name: Dar permisos de ejecución a Gradlew
+      run: chmod +x gradlew
+
+    - name: Construir con Gradle
+      run: ./gradlew build
+
+    - name: Subir el JAR generado
+      uses: actions/upload-artifact@v4
+      with:
+        name: Mod-JAR-Java21
+        # La ruta suele ser build/libs/. Ajusta si tu proyecto es multiproyecto.
+        path: build/libs/*.jar
+        if-no-files-found: error
